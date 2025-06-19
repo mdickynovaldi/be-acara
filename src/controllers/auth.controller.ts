@@ -169,18 +169,33 @@ export default {
     }
   },
 
+  // Fungsi async untuk mengambil data user yang sedang login (profile user)
+  // Parameter: req (Request) - object request HTTP, res (Response) - object response HTTP
   async me(req: Request, res: Response) {
     try {
+      // Mengambil data user dari request object yang sudah diverifikasi oleh auth middleware
+      // Request di-cast ke IRequestUser karena middleware sudah menambahkan properti user
+      // user berisi data yang didecode dari JWT token (id dan role)
       const user = (req as IRequestUser).user;
+
+      // Mencari data lengkap user di database berdasarkan ID yang ada di token
+      // findById() adalah method Mongoose untuk mencari document berdasarkan _id
+      // Await digunakan karena operasi database bersifat asynchronous
       const userData = await UserModel.findById(user.id);
+
+      // Mengembalikan response sukses dengan status 200 (OK)
+      // Data user akan otomatis tidak menyertakan password karena sudah di-override di model
       return res.status(200).json({
-        message: "Get user data success",
-        data: userData,
+        message: "Get user data success", // Pesan sukses
+        data: userData, // Data user lengkap dari database
       });
     } catch (error) {
+      // Menangkap error yang mungkin terjadi selama proses pengambilan data
+      // (misalnya error database connection, user tidak ditemukan, dll)
+      // Kembalikan response error dengan status 400 (Bad Request)
       return res.status(400).json({
-        message: (error as Error).message,
-        data: null,
+        message: (error as Error).message, // Cast error ke tipe Error untuk mengakses property message
+        data: null, // Data null karena terjadi error
       });
     }
   },
