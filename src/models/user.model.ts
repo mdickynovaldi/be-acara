@@ -123,11 +123,36 @@ const userSchema = new schema(
   }
 );
 
+// Middleware Mongoose yang dijalankan sebelum data user disimpan ke database
+// Fungsi ini akan otomatis mengenkripsi password setiap kali ada operasi save
 userSchema.pre("save", function (next) {
+  // Mengambil instance user yang sedang disimpan dan casting ke tipe IUser
   const user = this as IUser;
+
+  // Mengenkripsi password user menggunakan fungsi encrypt sebelum disimpan
+  // Password asli akan diganti dengan password yang sudah di-hash
   user.password = encrypt(user.password);
+
+  // Melanjutkan proses save dengan memanggil next()
   next();
 });
+
+// Method khusus untuk mengoverride fungsi toJSON default dari Mongoose
+// Method ini akan dipanggil otomatis ketika object user dikonversi ke JSON
+// (misalnya saat mengirim response API atau JSON.stringify())
+userSchema.methods.toJSON = function () {
+  // Mengkonversi document Mongoose menjadi plain JavaScript object
+  // toObject() menghilangkan metadata Mongoose dan hanya menyisakan data murni
+  const user = this.toObject();
+
+  // Menghapus field password dari object user sebelum dikembalikan
+  // Ini penting untuk keamanan - password tidak boleh dikirim ke client
+  delete user.password;
+
+  // Mengembalikan object user tanpa password
+  // Object ini yang akan muncul ketika user data di-serialize ke JSON
+  return user;
+};
 
 // Membuat model User dari schema yang sudah didefinisikan
 // Model ini akan digunakan untuk operasi CRUD ke database
