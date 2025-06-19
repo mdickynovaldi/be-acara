@@ -17,8 +17,6 @@ export interface IUser {
   isBlocked: boolean; // Status pemblokiran
   isSuspended: boolean; // Status penangguhan
   activationCode: string; // Kode aktivasi untuk verifikasi
-  createdAt: Date; // Tanggal pembuatan akun
-  updatedAt: Date; // Tanggal terakhir diupdate
 }
 
 // Membuat alias untuk mongoose.Schema agar lebih mudah digunakan
@@ -108,14 +106,6 @@ const userSchema = new schema(
     activationCode: {
       type: schema.Types.String,
     },
-    // Tanggal pembuatan (akan diisi otomatis oleh timestamps)
-    createdAt: {
-      type: schema.Types.Date,
-    },
-    // Tanggal update terakhir (akan diisi otomatis oleh timestamps)
-    updatedAt: {
-      type: schema.Types.Date,
-    },
   },
   {
     // Opsi timestamps: true akan otomatis menambahkan createdAt dan updatedAt
@@ -125,17 +115,17 @@ const userSchema = new schema(
 
 // Middleware Mongoose yang dijalankan sebelum data user disimpan ke database
 // Fungsi ini akan otomatis mengenkripsi password setiap kali ada operasi save
-userSchema.pre("save", function (next) {
-  // Mengambil instance user yang sedang disimpan dan casting ke tipe IUser
-  const user = this as IUser;
+// userSchema.pre("save", function (next) {
+//   // Mengambil instance user yang sedang disimpan dan casting ke tipe IUser
+//   const user = this as IUser;
 
-  // Mengenkripsi password user menggunakan fungsi encrypt sebelum disimpan
-  // Password asli akan diganti dengan password yang sudah di-hash
-  user.password = encrypt(user.password);
+//   // Mengenkripsi password user menggunakan fungsi encrypt sebelum disimpan
+//   // Password asli akan diganti dengan password yang sudah di-hash
+//   user.password = encrypt(user.password);
 
-  // Melanjutkan proses save dengan memanggil next()
-  next();
-});
+//   // Melanjutkan proses save dengan memanggil next()
+//   next();
+// });
 
 // Method khusus untuk mengoverride fungsi toJSON default dari Mongoose
 // Method ini akan dipanggil otomatis ketika object user dikonversi ke JSON
@@ -148,7 +138,6 @@ userSchema.methods.toJSON = function () {
   // Menghapus field password dari object user sebelum dikembalikan
   // Ini penting untuk keamanan - password tidak boleh dikirim ke client
   delete user.password;
-
   // Mengembalikan object user tanpa password
   // Object ini yang akan muncul ketika user data di-serialize ke JSON
   return user;

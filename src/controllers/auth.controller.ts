@@ -5,6 +5,8 @@ import * as Yup from "yup";
 // Import model User untuk operasi database
 import UserModel from "../models/user.model";
 import { encrypt } from "../utils/encryption";
+import { generateToken } from "../utils/jwt";
+import { IRequestUser } from "../middlewares/auth.middleware";
 
 // Mendefinisikan tipe data untuk registrasi user
 // Ini membantu TypeScript memahami struktur data yang diharapkan
@@ -65,13 +67,25 @@ export default {
         confirmPassword,
       });
 
+      const user = await UserModel.findOne({
+        $or: [{ username }, { email }],
+      });
+      if (user) {
+        return res.status(400).json({
+          message: "User already exists",
+          data: null,
+        });
+      }
+
+      const passwordHash = encrypt(password);
+
       // Jika validasi berhasil, buat user baru di database
       // Hanya menyimpan data yang diperlukan (tanpa confirmPassword)
       const registerUser = await UserModel.create({
         fullName,
         username,
         email,
-        password, // Note: Password ini sebaiknya di-hash terlebih dahulu sebelum disimpan
+        password: passwordHash, // Note: Password ini sebaiknya di-hash terlebih dahulu sebelum disimpan
       });
 
       // Mengembalikan response sukses dengan status 200 dan data user yang baru dibuat
@@ -130,13 +144,18 @@ export default {
         });
       }
 
+      const token = generateToken({
+        id: userByIdentifier._id,
+        role: userByIdentifier.role,
+      });
+
       // Jika semua validasi berhasil (user ditemukan dan password benar)
       // Kembalikan response sukses dengan status 200 dan data user
       // Data user akan otomatis tidak menyertakan password karena sudah di-override di model
       return res.status(200).json({
         message: "Login success",
         data: {
-          user: userByIdentifier,
+          user: token,
         },
       });
     } catch (error) {
@@ -145,6 +164,22 @@ export default {
       // Kembalikan response error dengan status 400 (Bad Request)
       return res.status(400).json({
         message: (error as Error).message, // Cast error ke tipe Error untuk mengakses property message
+        data: null,
+      });
+    }
+  },
+
+  async me(req: Request, res: Response) {
+    try {
+      const user = (req as IRequestUser).user;
+      const userData = await UserModel.findById(user.id);
+      return res.status(200).json({
+        message: "Get user data success",
+        data: userData,
+      });
+    } catch (error) {
+      return res.status(400).json({
+        message: (error as Error).message,
         data: null,
       });
     }
