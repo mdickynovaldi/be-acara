@@ -1,5 +1,6 @@
 // Import library mongoose untuk berinteraksi dengan MongoDB
 import mongoose from "mongoose";
+import { encrypt } from "../utils/encryption";
 
 // Interface TypeScript untuk mendefinisikan struktur data User
 // Interface ini membantu dalam type checking dan autocomplete
@@ -121,6 +122,12 @@ const userSchema = new schema(
     timestamps: true,
   }
 );
+
+userSchema.pre("save", function (next) {
+  const user = this as IUser;
+  user.password = encrypt(user.password);
+  next();
+});
 
 // Membuat model User dari schema yang sudah didefinisikan
 // Model ini akan digunakan untuk operasi CRUD ke database
