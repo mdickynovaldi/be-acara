@@ -13,10 +13,5 @@
     }
   ],
   "theme": "saturn",
-  "references": [
-    {
-      "name": "Be Acara API Reference",
-      "path": "docs/openapi.yaml"
-    }
-  ]
+  "references": []
 }
