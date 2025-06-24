@@ -1,0 +1,22 @@
+{
+  "$schema": "https://cdn.scalar.com/schema/scalar-config.json",
+  "subdomain": "be-acara",
+  "guides": [
+    {
+      "name": "Be Acara",
+      "sidebar": [
+        {
+          "path": "docs/be-acara/api-reference.md",
+          "type": "page"
+        }
+      ]
+    }
+  ],
+  "theme": "saturn",
+  "references": [
+    {
+      "name": "Be Acara API Reference",
+      "path": "docs/openapi.yaml"
+    }
+  ]
+}
