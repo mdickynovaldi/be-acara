@@ -6,7 +6,7 @@
       "name": "Be Acara",
       "sidebar": [
         {
-          "path": "docs/be-acara/api-reference.md",
+          "path": "docs/api-reference.md",
           "type": "page"
         }
       ]
